@@ -1,0 +1,19 @@
+CXX = g++
+CXXFLAGS = -std=c++11 -Wall -g -Iinclude
+OBJ = src/network_utils.o src/raw_socket.o src/tracerout.o src/main.o
+EXEC = network_diagnostic_utility
+
+$(EXEC): $(OBJ)
+	$(CXX) $(CXXFLAGS) -o $(EXEC) $(OBJ)
+
+src/network_utils.o: src/network_utils.cpp include/network_utils.h
+	$(CXX) $(CXXFLAGS) -c src/network_utils.cpp -o src/network_utils.o
+
+src/raw_socket.o: src/raw_socket.cpp include/raw_socket.h
+	$(CXX) $(CXXFLAGS) -c src/raw_socket.cpp -o src/raw_socket.o
+
+src/tracerout.o: src/tracerout.cpp include/tracerout.h
+	$(CXX) $(CXXFLAGS) -c src/tracerout.cpp -o src/tracerout.o
+
+clean:
+	rm -f $(OBJ) $(EXEC)
