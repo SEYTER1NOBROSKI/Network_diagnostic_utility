@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <chrono>
 
 #define MAX_HOPS 30
 
@@ -48,6 +49,8 @@ bool runTraceroute(const std::string& hostname) {
     for (int ttl = 1; ttl <= MAX_HOPS; ttl++) {
         setsockopt(sockfd, IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl));
 
+        auto start_time = std::chrono::high_resolution_clock::now();
+
         struct icmphdr icmp_hdr = {};
         icmp_hdr.type = ICMP_ECHO;
         icmp_hdr.code = 0;
@@ -61,13 +64,16 @@ bool runTraceroute(const std::string& hostname) {
         }
 
         struct sockaddr_in sender;
-        std::cout << "Waiting for ICMP response...\n";
         if (receiveICMP(sockfd, sender)) {
             std::string senderIP = inet_ntoa(sender.sin_addr);
             std::string hostname = resolveHostname(senderIP);
-            std::cout << "Received response from: " << senderIP << std::endl;
 
-            std::cout << ttl << " " << senderIP << " (" << hostname << ")\n";
+            std::cout << ttl << " " << senderIP << " (" << hostname << ") ";
+
+            auto end_time = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double, std::milli> rtt = end_time - start_time;
+            std::cout << "RTT: " << rtt.count() << " ms\n";
+
 
             if (sender.sin_addr.s_addr == dest_addr.sin_addr.s_addr) {
                 std::cout << "Destination reached!\n";
@@ -77,7 +83,6 @@ bool runTraceroute(const std::string& hostname) {
             std::cout << ttl << " * * *\n";
         }
 
-        usleep(500000);
     }
 
     close(sockfd);
