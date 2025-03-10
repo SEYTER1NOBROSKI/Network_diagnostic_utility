@@ -15,6 +15,6 @@
 #define MAX_HOPS 30
 #define TIMEOUT_MS 1000
 
-bool runTraceroute(const std::string& target);
+bool runTraceroute(const std::string& target, const std::string& interface);
 
 std::string resolveHostname(const std::string& ip);

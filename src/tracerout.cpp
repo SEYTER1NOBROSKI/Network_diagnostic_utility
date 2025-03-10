@@ -36,8 +36,8 @@ struct sockaddr_in resolveIPAddress(const std::string& hostname) {
     return addr;
 }
 
-bool runTraceroute(const std::string& hostname) {
-    int sockfd = createRawSocket();
+bool runTraceroute(const std::string& hostname, const std::string& interface) {
+    int sockfd = createRawSocket(interface);
     if (sockfd < 0) return false;
 
     struct sockaddr_in dest_addr = resolveIPAddress(hostname);

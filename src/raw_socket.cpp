@@ -28,7 +28,7 @@ unsigned short checksum(void *b, int len) {
     return result;
 }
 
-int createRawSocket() {
+int createRawSocket(const std::string& interface) {
     int sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
     if (sockfd < 0) {
         perror("socket");
@@ -38,6 +38,12 @@ int createRawSocket() {
     struct timeval timeout = { TIMEOUT_SEC, 0 };
     if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
         perror("setsockopt");
+        close(sockfd);
+        return -1;
+    }
+
+    if (setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE, interface.c_str(), interface.size()) < 0) {
+        perror("setsockopt - SO_BINDTODEVICE");
         close(sockfd);
         return -1;
     }
