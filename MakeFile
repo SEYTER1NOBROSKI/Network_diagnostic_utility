@@ -1,19 +1,29 @@
 CXX = g++
 CXXFLAGS = -std=c++11 -Wall -g -Iinclude
-OBJ = src/network_utils.o src/raw_socket.o src/tracerout.o src/main.o
+OBJ_DIR = obj
+SRC_DIR = src
+INCLUDE_DIR = include
 EXEC = network_diagnostic_utility
+
+OBJ = $(OBJ_DIR)/network_utils.o $(OBJ_DIR)/raw_socket.o $(OBJ_DIR)/tracerout.o $(OBJ_DIR)/main.o
 
 $(EXEC): $(OBJ)
 	$(CXX) $(CXXFLAGS) -o $(EXEC) $(OBJ)
 
-src/network_utils.o: src/network_utils.cpp include/network_utils.h
-	$(CXX) $(CXXFLAGS) -c src/network_utils.cpp -o src/network_utils.o
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
 
-src/raw_socket.o: src/raw_socket.cpp include/raw_socket.h
-	$(CXX) $(CXXFLAGS) -c src/raw_socket.cpp -o src/raw_socket.o
+$(OBJ_DIR)/network_utils.o: $(SRC_DIR)/network_utils.cpp $(INCLUDE_DIR)/network_utils.h | $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/network_utils.cpp -o $(OBJ_DIR)/network_utils.o
 
-src/tracerout.o: src/tracerout.cpp include/tracerout.h
-	$(CXX) $(CXXFLAGS) -c src/tracerout.cpp -o src/tracerout.o
+$(OBJ_DIR)/raw_socket.o: $(SRC_DIR)/raw_socket.cpp $(INCLUDE_DIR)/raw_socket.h | $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/raw_socket.cpp -o $(OBJ_DIR)/raw_socket.o
+
+$(OBJ_DIR)/tracerout.o: $(SRC_DIR)/tracerout.cpp $(INCLUDE_DIR)/tracerout.h | $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/tracerout.cpp -o $(OBJ_DIR)/tracerout.o
+
+$(OBJ_DIR)/main.o: $(SRC_DIR)/main.cpp | $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/main.cpp -o $(OBJ_DIR)/main.o
 
 clean:
-	rm -f $(OBJ) $(EXEC)
+	rm -rf $(OBJ_DIR) $(EXEC)

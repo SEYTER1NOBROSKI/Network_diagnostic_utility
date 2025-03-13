@@ -3,8 +3,8 @@
 #include <string>
 #include <netinet/in.h>
 
-std::string ipToString(struct sockaddr_in addr);
+bool interfaceHasInternetAccess(const std::string& interface);
 
-std::string getHostName(const std::string& ip);
+std::string resolveHostname(const std::string& ip);
 
-std::string getHostByAddr(const std::string& ip);
+struct sockaddr_in resolveIPAddress(const std::string& hostname);

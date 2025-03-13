@@ -9,34 +9,13 @@
 
 #define MAX_HOPS 30
 
-std::string resolveHostname(const std::string& ip) {
-    struct sockaddr_in sa;
-    sa.sin_family = AF_INET;
-    inet_pton(AF_INET, ip.c_str(), &sa.sin_addr);
-
-    char host[NI_MAXHOST];
-    if (getnameinfo((struct sockaddr*)&sa, sizeof(sa), host, sizeof(host), NULL, 0, NI_NAMEREQD) == 0) {
-        return std::string(host);
-    } else {
-        return ip;
-    }
-}
-
-struct sockaddr_in resolveIPAddress(const std::string& hostname) {
-    struct sockaddr_in addr = {};
-    addr.sin_family = AF_INET;
-
-    struct hostent* host = gethostbyname(hostname.c_str());
-    if (host) {
-        addr.sin_addr = *reinterpret_cast<struct in_addr*>(host->h_addr);
-    } else {
-        inet_pton(AF_INET, hostname.c_str(), &addr.sin_addr);
-    }
-
-    return addr;
-}
-
 bool runTraceroute(const std::string& hostname, const std::string& interface) {
+
+    if (!interfaceHasInternetAccess(interface)) {
+        std::cerr << "Error: Interface " << interface << " does not have internet access." << std::endl;
+        return 1;
+    }
+
     int sockfd = createRawSocket(interface);
     if (sockfd < 0) return false;
 
@@ -49,40 +28,61 @@ bool runTraceroute(const std::string& hostname, const std::string& interface) {
     for (int ttl = 1; ttl <= MAX_HOPS; ttl++) {
         setsockopt(sockfd, IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl));
 
-        auto start_time = std::chrono::high_resolution_clock::now();
-
-        struct icmphdr icmp_hdr = {};
-        icmp_hdr.type = ICMP_ECHO;
-        icmp_hdr.code = 0;
-        icmp_hdr.un.echo.id = getpid();
-        icmp_hdr.un.echo.sequence = ttl;
-        icmp_hdr.checksum = 0;
-
-        if (!sendICMP(sockfd, dest_addr, icmp_hdr)) {
-            std::cerr << "Failed to send ICMP packet at hop " << ttl << "\n";
-            break;
-        }
+        std::cout << ttl << " ";
 
         struct sockaddr_in sender;
-        if (receiveICMP(sockfd, sender)) {
-            std::string senderIP = inet_ntoa(sender.sin_addr);
-            std::string hostname = resolveHostname(senderIP);
+        std::vector<double> rtt_values;
+        std::string senderIP;
+        std::string senderHostname;
 
-            std::cout << ttl << " " << senderIP << " (" << hostname << ") ";
+        bool received = false;
 
-            auto end_time = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double, std::milli> rtt = end_time - start_time;
-            std::cout << "RTT: " << rtt.count() << " ms\n";
+        for (int i = 0; i < 3; i++) {
+            auto start_time = std::chrono::high_resolution_clock::now();
 
+            struct icmphdr icmp_hdr = {};
+            icmp_hdr.type = ICMP_ECHO;
+            icmp_hdr.code = 0;
+            icmp_hdr.un.echo.id = getpid();
+            icmp_hdr.un.echo.sequence = ttl * 3 + i;
+            icmp_hdr.checksum = 0;
 
-            if (sender.sin_addr.s_addr == dest_addr.sin_addr.s_addr) {
-                std::cout << "Destination reached!\n";
-                break;
+            if (!sendICMP(sockfd, dest_addr, icmp_hdr)) {
+                std::cerr << "Failed to send ICMP packet at hop " << ttl << "\n";
+                continue;
             }
-        } else {
-            std::cout << ttl << " * * *\n";
+
+            if (receiveICMP(sockfd, sender)) {
+                received = true;
+                senderIP = inet_ntoa(sender.sin_addr);
+                senderHostname = resolveHostname(senderIP);
+
+                auto end_time = std::chrono::high_resolution_clock::now();
+                std::chrono::duration<double, std::milli> rtt = end_time - start_time;
+                rtt_values.push_back(rtt.count());
+            } else {
+                rtt_values.push_back(-1.0);
+            }
         }
 
+        if (received) {
+            std::cout << senderIP << " (" << senderHostname << ") ";
+            for (double rtt : rtt_values) {
+                if (rtt >= 0) {
+                    std::cout << rtt << " ms ";
+                } else {
+                    std::cout << "* ";
+                }
+            }
+            std::cout << "\n";
+        } else {
+            std::cout << "* * *\n";
+        }
+
+        if (sender.sin_addr.s_addr == dest_addr.sin_addr.s_addr) {
+            std::cout << "Destination reached!\n";
+            break;
+        }
     }
 
     close(sockfd);

@@ -75,6 +75,6 @@ bool receiveICMP(int sockfd, struct sockaddr_in& sender) {
         return false;
     }
 
-    std::cout << "Received " << received_bytes << " bytes from " << inet_ntoa(sender.sin_addr) << std::endl;
+    //std::cout << "Received " << received_bytes << " bytes from " << inet_ntoa(sender.sin_addr) << std::endl;
     return true;
 }

@@ -3,12 +3,15 @@
 #include <netdb.h>
 #include <cstring>
 #include <iostream>
+#include <unistd.h>
 
-std::string ipToString(struct sockaddr_in addr) {
-    return inet_ntoa(addr.sin_addr);
+bool interfaceHasInternetAccess(const std::string& interface) {
+    std::string cmd = "ping -I " + interface + " -c 1 -W 1 8.8.8.8 > /dev/null 2>&1";
+    int result = system(cmd.c_str());
+    return (result == 0);
 }
 
-std::string getHostName(const std::string& ip) {
+std::string resolveHostname(const std::string& ip) {
     struct sockaddr_in sa;
     sa.sin_family = AF_INET;
     inet_pton(AF_INET, ip.c_str(), &sa.sin_addr);
@@ -21,15 +24,16 @@ std::string getHostName(const std::string& ip) {
     }
 }
 
-std::string getHostByAddr(const std::string& ip) {
-    struct sockaddr_in sa;
-    sa.sin_family = AF_INET;
-    inet_pton(AF_INET, ip.c_str(), &sa.sin_addr);
+struct sockaddr_in resolveIPAddress(const std::string& hostname) {
+    struct sockaddr_in addr = {};
+    addr.sin_family = AF_INET;
 
-    char host[NI_MAXHOST];
-    if (getnameinfo((struct sockaddr*)&sa, sizeof(sa), host, sizeof(host), NULL, 0, NI_NAMEREQD) == 0) {
-        return std::string(host);
+    struct hostent* host = gethostbyname(hostname.c_str());
+    if (host) {
+        addr.sin_addr = *reinterpret_cast<struct in_addr*>(host->h_addr);
     } else {
-        return ip;
+        inet_pton(AF_INET, hostname.c_str(), &addr.sin_addr);
     }
+
+    return addr;
 }
