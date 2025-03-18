@@ -6,3 +6,5 @@ a.out
 *.exe
 *.out
 *.bin
+
+network_diagnostic_utility
