@@ -31,19 +31,19 @@ unsigned short checksum(void *b, int len) {
 int createRawSocket(const std::string& interface) {
     int sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
     if (sockfd < 0) {
-        perror("socket");
+        perror("Error creating raw socket (socket)");
         return -1;
     }
 
     struct timeval timeout = { TIMEOUT_SEC, 0 };
     if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
-        perror("setsockopt");
+        perror("Error setting receive timeout (setsockopt - SO_RCVTIMEO)");
         close(sockfd);
         return -1;
     }
 
     if (setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE, interface.c_str(), interface.size()) < 0) {
-        perror("setsockopt - SO_BINDTODEVICE");
+        perror(("Error binding socket to interface " + interface + " (setsockopt - SO_BINDTODEVICE)").c_str());
         close(sockfd);
         return -1;
     }
@@ -58,7 +58,7 @@ bool sendICMP(int sockfd, struct sockaddr_in& dest_addr, struct icmphdr& icmp_hd
     ssize_t sent_bytes = sendto(sockfd, &icmp_hdr, sizeof(icmp_hdr), 0,
                                 (struct sockaddr*)&dest_addr, sizeof(dest_addr));
     if (sent_bytes < 0) {
-        perror("sendto");
+        perror("Error sending ICMP packet (sendto)");
         return false;
     }
     return true;
