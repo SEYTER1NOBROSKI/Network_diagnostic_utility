@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Your Network Interface: " << argv[2] << "\n";
 
     if (runTraceroute(hostname, interface)) {
-        std::cout << "Traceroute completed successfully.\n";
+        std::cout << "Traceroute completed.\n";
     } else {
         std::cerr << "Traceroute failed.\n";
     }
