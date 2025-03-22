@@ -8,3 +8,4 @@ a.out
 *.bin
 
 network_diagnostic_utility
+network_diagnostic_utility_openwrt
