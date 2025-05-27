@@ -6,6 +6,8 @@
 int main(int argc, char* argv[]) {
     if (argc < 2) {
         std::cerr << "Usage:\n"
+                  << "  " << argv[0] << " arp -n <ip_addr>\n"
+                  << "  " << argv[0] << " arp\n"
                   << "  " << argv[0] << " whois <ip_or_domain>\n"
                   << "  " << argv[0] << " netstats <interface> <time>\n"
                   << "  " << argv[0] << " dns <hostname_or_ip>\n"
@@ -15,6 +17,16 @@ int main(int argc, char* argv[]) {
     }
 
     std::string command = argv[1];
+    
+    if (command == "arp" && argc >= 4 && std::string(argv[2]) == "-n") {
+        printARPTable(argv[3]);
+        return 0;
+    }
+
+    if (command == "arp") {
+        printARPTable();
+        return 0;
+    }
 
     if (command == "whois") {
         if (argc < 3) {

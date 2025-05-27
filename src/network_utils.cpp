@@ -15,6 +15,51 @@
 #include <algorithm>
 #include <stdexcept>
 
+void printARPTable(const std::string& targetIP) {
+    std::ifstream ARPFile("/proc/net/arp");
+
+    if (!ARPFile.is_open()) {
+        std::cerr << "Cannot open /proc/net/arp\n";
+        return;
+    }
+
+    std::string line;
+    std::getline(ARPFile, line);
+
+    bool found = false;
+
+    std::cout << std::left
+              << std::setw(20) << "IP Address"
+              << std::setw(20) << "MAC Address"
+              << std::setw(10) << "Interface" << "\n";
+    std::cout << std::string(50, '-') << "\n";
+
+    while (std::getline(ARPFile, line)) {
+        std::istringstream iss(line);
+        std::string ip, hwType, flags, mac, mask, device;
+
+        if (iss >> ip >> hwType >> flags >> mac >> mask >> device) {
+            if (targetIP.empty() || ip == targetIP) {
+                std::cout << std::left
+                          << std::setw(20) << ip
+                          << std::setw(20) << mac
+                          << std::setw(10) << device << "\n";
+                found = true;
+
+                if (!targetIP.empty()) {
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!found && !targetIP.empty()) {
+        std::cout << "No MAC entry found for IP: " << targetIP << "\n";
+    }
+
+    ARPFile.close();
+}
+
 std::string queryWhoisServer(const std::string& server, const std::string& query) {
     addrinfo hints{}, *res;
     hints.ai_socktype = SOCK_STREAM;

@@ -3,6 +3,8 @@
 #include <string>
 #include <netinet/in.h>
 
+void printARPTable(const std::string& targetIP = "");
+
 std::string queryWhoisServer(const std::string& server, const std::string& query);
 
 std::string trim(const std::string& s);
