@@ -1,4 +1,5 @@
 #include "tracerout.h"
+#include "network_processes.h"
 #include "network_utils.h"
 #include <iostream>
 #include <string>
@@ -6,6 +7,7 @@
 int main(int argc, char* argv[]) {
     if (argc < 2) {
         std::cerr << "Usage:\n"
+                  << "  " << argv[0] << " connections\n"
                   << "  " << argv[0] << " arp -n <ip_addr>\n"
                   << "  " << argv[0] << " arp\n"
                   << "  " << argv[0] << " whois <ip_or_domain>\n"
@@ -17,6 +19,17 @@ int main(int argc, char* argv[]) {
     }
 
     std::string command = argv[1];
+
+    if (command == "net-procs") {
+        printNetworkProcesses("TCP", "/proc/net/tcp");
+        printNetworkProcesses("UDP", "/proc/net/udp");
+        return 0;
+    }
+
+    if (command == "connections") {
+        showAllConnections();
+        return 0;
+    }
     
     if (command == "arp" && argc >= 4 && std::string(argv[2]) == "-n") {
         printARPTable(argv[3]);

@@ -14,6 +14,68 @@
 #include <cerrno>
 #include <algorithm>
 #include <stdexcept>
+#include <map>
+
+void showProtocolConnections(const std::string& protocol, const std::string& path, bool isTCP) {
+    std::ifstream file(path);
+    if (!file.is_open()) {
+        std::cerr << "Cannot open " << path << "\n";
+        return;
+    }
+
+    std::string line;
+    std::getline(file, line);
+
+    while (std::getline(file, line)) {
+        std::istringstream iss(line);
+        std::string sl, local, rem, state;
+        iss >> sl >> local >> rem >> state;
+
+        std::string localIP = hexToIP(local.substr(0, 8));
+        std::string localPortHex = local.substr(9, 4);
+        std::string remoteIP = hexToIP(rem.substr(0, 8));
+        std::string remotePortHex = rem.substr(9, 4);
+
+        int localPort = hexToPort(localPortHex);
+        int remotePort = hexToPort(remotePortHex);
+
+        std::string stateStr = isTCP ? tcpState(state) : "-";
+
+        std::ostringstream localStr, remStr;
+        localStr << localIP << ":" << localPort;
+        remStr << remoteIP << ":" << remotePort;
+
+        std::cout << std::left
+                  << std::setw(8) << protocol
+                  << std::setw(22) << localStr.str()
+                  << std::setw(22) << remStr.str()
+                  << std::setw(15) << stateStr << "\n";
+    }
+
+    file.close();
+}
+
+void showAllConnections() {
+    std::cout << std::left
+              << std::setw(8)  << "Proto"
+              << std::setw(22) << "Local Address"
+              << std::setw(22) << "Remote Address"
+              << std::setw(15) << "State" << "\n";
+    std::cout << std::string(70, '-') << "\n";
+
+    showProtocolConnections("TCP", "/proc/net/tcp", true);
+    showProtocolConnections("UDP", "/proc/net/udp", false);
+}
+
+std::string tcpState(const std::string& hexState) {
+    static std::map<std::string, std::string> states = {
+        {"01", "ESTABLISHED"}, {"02", "SYN_SENT"}, {"03", "SYN_RECV"},
+        {"04", "FIN_WAIT1"}, {"05", "FIN_WAIT2"}, {"06", "TIME_WAIT"},
+        {"07", "CLOSE"}, {"08", "CLOSE_WAIT"}, {"09", "LAST_ACK"},
+        {"0A", "LISTEN"}, {"0B", "CLOSING"}
+    };
+    return states.count(hexState) ? states[hexState] : "UNKNOWN";
+}
 
 void printARPTable(const std::string& targetIP) {
     std::ifstream ARPFile("/proc/net/arp");
@@ -220,6 +282,14 @@ void dnsResolveAndPrint(const std::string& input) {
         std::cout << "Hostname: " << input << "\n";
         std::cout << "IP Address: " << ip << "\n";
     }
+}
+
+int hexToPort(const std::string& hexPort) {
+    unsigned int port;
+    std::stringstream ss;
+    ss << std::hex << hexPort;
+    ss >> port;
+    return port;
 }
 
 std::string hexToIP(const std::string& hex) {

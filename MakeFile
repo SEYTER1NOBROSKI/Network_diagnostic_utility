@@ -5,7 +5,7 @@ SRC_DIR = src
 INCLUDE_DIR = include
 EXEC = network_diagnostic_utility
 
-OBJ = $(OBJ_DIR)/network_utils.o $(OBJ_DIR)/raw_socket.o $(OBJ_DIR)/tracerout.o $(OBJ_DIR)/main.o
+OBJ = $(OBJ_DIR)/network_utils.o $(OBJ_DIR)/raw_socket.o $(OBJ_DIR)/tracerout.o $(OBJ_DIR)/main.o $(OBJ_DIR)/network_processes.o
 
 $(EXEC): $(OBJ)
 	$(CXX) $(CXXFLAGS) -o $(EXEC) $(OBJ)
@@ -24,6 +24,9 @@ $(OBJ_DIR)/tracerout.o: $(SRC_DIR)/tracerout.cpp $(INCLUDE_DIR)/tracerout.h | $(
 
 $(OBJ_DIR)/main.o: $(SRC_DIR)/main.cpp | $(OBJ_DIR)
 	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/main.cpp -o $(OBJ_DIR)/main.o
+
+$(OBJ_DIR)/network_processes.o: $(SRC_DIR)/network_processes.cpp | $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/network_processes.cpp -o $(OBJ_DIR)/network_processes.o
 
 clean:
 	rm -rf $(OBJ_DIR) $(EXEC)

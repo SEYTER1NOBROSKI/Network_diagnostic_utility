@@ -3,6 +3,14 @@
 #include <string>
 #include <netinet/in.h>
 
+std::string tcpState(const std::string& hexState);
+
+void showProtocolConnections(const std::string& protocol, const std::string& path, bool isTCP);
+
+void showAllConnections();
+
+int hexToPort(const std::string& hexPort);
+
 void printARPTable(const std::string& targetIP = "");
 
 std::string queryWhoisServer(const std::string& server, const std::string& query);
