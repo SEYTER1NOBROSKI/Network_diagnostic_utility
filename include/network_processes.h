@@ -2,14 +2,18 @@
 
 #include <string>
 
-std::string hexToIpPort(const std::string& hexIpPort);
-
-std::string findPidByInode(const std::string& inode);
-
-std::string getProcessName(const std::string& pid);
+std::string hexToIp(const std::string& hex, bool ipv6 = false);
 
 std::string tcp_State(const std::string& st);
 
-std::string getProcessNameByPid(const std::string& pid);
+int hex_ToPort(const std::string& hex);
 
-void printNetworkProcesses(const std::string& proto, const std::string& path);
+bool isNumeric(const std::string& str);
+
+std::string readSymlink(const std::string& path);
+
+std::string findProcessByInode(const std::string& inode);
+
+std::string formatAddress(const std::string& ip, int port, bool ipv6);
+
+void parseConnections(const std::string& path, bool ipv6 = false, const std::string& protocol = "TCP");

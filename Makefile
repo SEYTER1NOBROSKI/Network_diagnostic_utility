@@ -7,7 +7,7 @@ INCLUDE_DIR = include
 
 EXEC = network_diagnostic_utility_openwrt
 
-OBJ = $(OBJ_DIR)/network_utils.o $(OBJ_DIR)/raw_socket.o $(OBJ_DIR)/tracerout.o $(OBJ_DIR)/main.o $(OBJ_DIR)/network_processes.o
+OBJ = $(OBJ_DIR)/network_utils.o $(OBJ_DIR)/raw_socket.o $(OBJ_DIR)/tracerout.o $(OBJ_DIR)/main.o $(OBJ_DIR)/network_processes.o $(OBJ_DIR)/tcp_sniffer.o
 
 OPENWRT_LIB_DIR = /home/roman/openwrt-sdk-23.05.2-x86-64_gcc-12.3.0_musl.Linux-x86_64/staging_dir/toolchain-x86_64_gcc-12.3.0_musl/lib
 OPENWRT_INCLUDE_DIR = /home/roman/openwrt-sdk-23.05.2-x86-64_gcc-12.3.0_musl.Linux-x86_64/staging_dir/toolchain-x86_64_gcc-12.3.0_musl/include
@@ -34,6 +34,9 @@ $(OBJ_DIR)/main.o: $(SRC_DIR)/main.cpp | $(OBJ_DIR)
 
 $(OBJ_DIR)/network_processes.o: $(SRC_DIR)/network_processes.cpp | $(OBJ_DIR)
 	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/network_processes.cpp -o $(OBJ_DIR)/network_processes.o
+
+$(OBJ_DIR)/tcp_sniffer.o: $(SRC_DIR)/tcp_sniffer.cpp | $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/tcp_sniffer.cpp -o $(OBJ_DIR)/tcp_sniffer.o
 
 clean:
 	rm -rf $(OBJ_DIR) $(EXEC)

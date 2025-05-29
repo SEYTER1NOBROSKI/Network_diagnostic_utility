@@ -1,12 +1,15 @@
 #include "tracerout.h"
+#include "tcp_sniffer.h"
 #include "network_processes.h"
 #include "network_utils.h"
 #include <iostream>
 #include <string>
 
 int main(int argc, char* argv[]) {
+
     if (argc < 2) {
         std::cerr << "Usage:\n"
+                  << "  " << argv[0] << " net-procs\n"
                   << "  " << argv[0] << " connections\n"
                   << "  " << argv[0] << " arp -n <ip_addr>\n"
                   << "  " << argv[0] << " arp\n"
@@ -20,9 +23,16 @@ int main(int argc, char* argv[]) {
 
     std::string command = argv[1];
 
+    if (command == "tcp_sniffer") {
+        startTcpSniffer();
+        return 0;
+    }
+
     if (command == "net-procs") {
-        printNetworkProcesses("TCP", "/proc/net/tcp");
-        printNetworkProcesses("UDP", "/proc/net/udp");
+        parseConnections("/proc/net/tcp", false, "TCP");
+        parseConnections("/proc/net/udp", false, "UDP");
+        parseConnections("/proc/net/tcp6", true, "TCP");
+        parseConnections("/proc/net/udp6", true, "UDP");
         return 0;
     }
 
