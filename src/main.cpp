@@ -5,10 +5,44 @@
 #include <iostream>
 #include <string>
 
+void printHelp(const std::string& programName) {
+    std::cout << "Usage:\n"
+              << "  " << programName << " tcp_sniffer\n"
+              << "      -> Runs a sniffer to intercept TCP packets on the network\n\n"
+              
+              << "  " << programName << " net-procs\n"
+              << "      -> Displays a list of network processes and their connections\n\n"
+              
+              << "  " << programName << " connections\n"
+              << "      -> Shows all active network connections\n\n"
+              
+              << "  " << programName << " arp -n <ip_addr>\n"
+              << "      -> Shows the MAC address for the given IP address (without reverse DNS)\n\n"
+              
+              << "  " << programName << " arp\n"
+              << "      -> Displays the current ARP table\n\n"
+              
+              << "  " << programName << " whois <ip_or_domain>\n"
+              << "      -> Gets WHOIS information for an IP address or domain\n\n"
+              
+              << "  " << programName << " netstats <interface> <time>\n"
+              << "      -> Shows statistics (how many bytes were transmitted/received and the data transfer rate) for interface <interface> for <time> seconds\n\n"
+              
+              << "  " << programName << " dns <hostname_or_ip>\n"
+              << "      -> Performs DNS resolution for a hostname or IP address\n\n"
+              
+              << "  " << programName << " route\n"
+              << "      -> Displays the route table\n\n"
+              
+              << "  " << programName << " <hostname> <interface>\n"
+              << "      -> Determines the path to the node (Traceroute) via the specified interface\n";
+}
+
 int main(int argc, char* argv[]) {
 
     if (argc < 2) {
         std::cerr << "Usage:\n"
+                  << "  " << argv[0] << " tcp_sniffer\n"
                   << "  " << argv[0] << " net-procs\n"
                   << "  " << argv[0] << " connections\n"
                   << "  " << argv[0] << " arp -n <ip_addr>\n"
@@ -22,6 +56,11 @@ int main(int argc, char* argv[]) {
     }
 
     std::string command = argv[1];
+
+    if (command == "help") {
+        printHelp(argv[0]);
+        return 0;
+    }
 
     if (command == "tcp_sniffer") {
         startTcpSniffer();
